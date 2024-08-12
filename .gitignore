@@ -1,0 +1,34 @@
+# Ignore các file Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore môi trường ảo
+env/
+venv/
+icg_venv/
+
+# Ignore các tệp cấu hình IDE
+.vscode/
+.idea/
+
+# Ignore các tệp tạm thời hoặc các tệp không cần thiết
+*.log
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+
+# Ignore các tệp dữ liệu, mô hình hoặc đầu ra lớn
+data/
+models/
+*.h5
+*.pkl
+
+# Ignore các tệp đầu ra khi build
+build/
+dist/
+*.egg-info/
+
+# Ignore các file liên quan đến Jupyter Notebook
+.ipynb_checkpoints/
