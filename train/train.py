@@ -5,6 +5,8 @@ from generate_text.caption_generate import data_generator
 from data.load_220k_GPT4 import Load_Data
 from train.LSTM_Decoder import LSTM_ImageCaptionModel
 from train.method import split
+from keras.utils import custom_object_scope
+
 
 class ModelTrainer:
     def __init__(self, working_dir='model', epochs=15, batch_size=16):
@@ -43,8 +45,12 @@ class ModelTrainer:
         self.model.save(model_path)
         print(f"Model saved to {model_path}")
 
-    def load_model(self, model_path=None):
+    def read_model(self, model_path=None):
         if model_path is None:
             model_path = f"{self.working_dir}/best_model_220k_GPT4_Top1000_02.h5"
-        self.model = load_model(model_path)
+        
+        with custom_object_scope({'LSTM_ImageCaptionModel': LSTM_ImageCaptionModel}):
+            cus_model = load_model(model_path)
+        
         print(f"Model loaded from {model_path}")
+        return cus_model
