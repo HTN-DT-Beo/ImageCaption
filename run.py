@@ -4,6 +4,7 @@ from predict import predict
 DATA_DIR = 'data'
 
 trainer = ModelTrainer()
+trainer.train_model()
 model = trainer.read_model()
 features, mapping, tokenizer, vocab_size, max_length, train = trainer.prepare_data()
 image_path = DATA_DIR + '/Images_Test/12.jpg'

@@ -5,8 +5,8 @@ from tensorflow.keras.utils import plot_model
 WORKING_DIR = 'model'
 
 class LSTM_ImageCaptionModel(Model):
-    def __init__(self, vocab_size, max_length):
-        super().__init__()
+    def __init__(self, vocab_size, max_length, **kwargs):
+        super().__init__(**kwargs)
         self.vocab_size = vocab_size
         self.max_length = max_length
         
