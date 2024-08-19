@@ -1,15 +1,17 @@
-from tensorflow.keras.models import load_model
+import os
+import tensorflow
 from image.extract_image_feature import Extract_Image_Feature as EIF
 from caption.caption_process import Caption_Process as CP
 from generate_text.caption_generate import data_generator
 from data.load_220k_GPT4 import Load_Data
 from train.LSTM_Decoder import LSTM_ImageCaptionModel
 from train.method import split
-from keras.utils import custom_object_scope
 
+WEIGHT_DIR = 'model/weights/'
+CHECKPOINT_PATH = '/training/cp-{epoch:04d}.weights.h5'
 
 class ModelTrainer:
-    def __init__(self, working_dir='model', epochs=15, batch_size=16):
+    def __init__(self, working_dir='model', epochs=1, batch_size=16):
         self.working_dir = working_dir
         self.epochs = epochs
         self.batch_size = batch_size
@@ -27,30 +29,26 @@ class ModelTrainer:
 
     def build_model(self, vocab_size, max_length):
         self.model = LSTM_ImageCaptionModel(vocab_size, max_length)
-        
-    def train_model(self):
+
+    def train_model(self, model_dir):
+        checkpoint_path = WEIGHT_DIR + model_dir + CHECKPOINT_PATH
+        # Tạo một callback lưu checkpoint sau mỗi epoch
+        cp_callback = tensorflow.keras.callbacks.ModelCheckpoint(
+            filepath=checkpoint_path, 
+            save_weights_only=True,
+            verbose=1)
+
         features, mapping, tokenizer, vocab_size, max_length, train = self.prepare_data()
         self.build_model(vocab_size, max_length)
         
         steps = len(train) // self.batch_size
         for i in range(self.epochs):
             generator = data_generator(train, mapping, features, tokenizer, max_length, vocab_size, self.batch_size)
-            self.model.fit(generator, epochs=1, steps_per_epoch=steps, verbose=1)
-        
-        self.save_model()
+            self.model.fit(generator, epochs=1, steps_per_epoch=steps, callbacks=cp_callback, verbose=1)
 
-    def save_model(self, model_path=None):
-        if model_path is None:
-            model_path = f"{self.working_dir}/best_model_220k_GPT4_Top1000_02.h5"
-        self.model.save(model_path)
-        print(f"Model saved to {model_path}")
-
-    def read_model(self, model_path=None):
-        if model_path is None:
-            model_path = f"{self.working_dir}/best_model_220k_GPT4_Top1000_02.h5"
-        
-        with custom_object_scope({'LSTM_ImageCaptionModel': LSTM_ImageCaptionModel}):
-            cus_model = load_model(model_path)
-        
-        print(f"Model loaded from {model_path}")
-        return cus_model
+    def load_weights(self, model_dir, vocab_size, max_length):
+        checkpoint_path = WEIGHT_DIR + model_dir + CHECKPOINT_PATH
+        self.build_model(vocab_size, max_length)
+        # Tải trọng số từ checkpoint
+        self.model.load_weights(checkpoint_path.format(epoch=1))
+        return self.model

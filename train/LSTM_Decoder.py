@@ -25,6 +25,25 @@ class LSTM_ImageCaptionModel(Model):
         # Build the model
         self.build_model()
 
+    def call(self, inputs):
+        inputs1, inputs2 = inputs
+        
+        # Process image features
+        x1 = self.dropout1(inputs1)
+        x1 = self.dense1(x1)
+        
+        # Process sequence features
+        x2 = self.embedding(inputs2)
+        x2 = self.dropout2(x2)
+        x2 = self.lstm(x2)
+        
+        # Combine features
+        combined_features = self.add_layer([x1, x2])
+        x = self.dense2(combined_features)
+        outputs = self.output_layer(x)
+        
+        return outputs
+
     def build_model(self):
         # Define inputs
         # inputs1 = Input(shape=(4096,))
@@ -59,10 +78,19 @@ class LSTM_ImageCaptionModel(Model):
         except Exception as e:
             print(f"Error in saving model diagram: {e}")
 
-    def fit(self, generator, epochs=1, steps_per_epoch=None, validation_data=None, verbose=1):
+    def fit(self, generator, epochs=1, steps_per_epoch=None, validation_data=None, verbose=1, callbacks=None):
         """Huấn luyện mô hình với dữ liệu sinh ra từ generator."""
         self.model.fit(generator,
                        epochs=epochs,
                        steps_per_epoch=steps_per_epoch,
                        validation_data=validation_data,
-                       verbose=verbose)
+                       verbose=verbose,
+                       callbacks=callbacks)
+        
+    def load_weights(self, file_path):
+        """Tải trọng số từ file."""
+        try:
+            self.model.load_weights(file_path)
+            print(f"Weights loaded from {file_path}")
+        except Exception as e:
+            print(f"Error loading weights: {e}")
