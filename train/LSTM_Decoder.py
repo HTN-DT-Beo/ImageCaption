@@ -46,8 +46,8 @@ class LSTM_ImageCaptionModel(Model):
 
     def build_model(self):
         # Define inputs
-        # inputs1 = Input(shape=(4096,))
-        inputs1 = Input(shape=(1000,))
+        inputs1 = Input(shape=(4096,))
+        # inputs1 = Input(shape=(1000,))
         inputs2 = Input(shape=(self.max_length,))
 
         # Process image features
@@ -94,3 +94,7 @@ class LSTM_ImageCaptionModel(Model):
             print(f"Weights loaded from {file_path}")
         except Exception as e:
             print(f"Error loading weights: {e}")
+
+    def predict(self, inputs, verbose=0):
+        """Dự đoán dựa trên đầu vào."""
+        return self.model.predict(inputs, verbose=verbose)

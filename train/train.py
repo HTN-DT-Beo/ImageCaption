@@ -11,7 +11,7 @@ WEIGHT_DIR = 'model/weights/'
 CHECKPOINT_PATH = '/training/cp-{epoch:04d}.weights.h5'
 
 class ModelTrainer:
-    def __init__(self, working_dir='model', epochs=1, batch_size=16):
+    def __init__(self, working_dir='model', epochs=15, batch_size=16):
         self.working_dir = working_dir
         self.epochs = epochs
         self.batch_size = batch_size
