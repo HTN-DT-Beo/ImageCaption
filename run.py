@@ -1,11 +1,18 @@
 from train.train import ModelTrainer
 from predict import predict
-
+from image import extract_image_feature
 DATA_DIR = 'data'
 MODEL_DIR = 'LSTM'
+EXTRACT_IMAGE_FEATURE_FILE = '220k_GPT4_features_1k.pkl'
+
+# Prepare Image Feature
+eif = extract_image_feature.Extract_Image_Feature()
+eif.Store_Features(EXTRACT_IMAGE_FEATURE_FILE)
+
+
 # Train
 trainer = ModelTrainer()
-# trainer.train_model(MODEL_DIR)
+trainer.train_model(MODEL_DIR)
 features, mapping, tokenizer, vocab_size, max_length, train = trainer.prepare_data()
 
 # Load Wieghts

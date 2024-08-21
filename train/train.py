@@ -22,7 +22,7 @@ class ModelTrainer:
 
     def prepare_data(self):
         df = self.load_data.Get_1000()
-        features = self.eif.Load_Features()
+        features = self.eif.Load_Features('220k_GPT4_features_1k.pkl')
         mapping, tokenizer, vocab_size, max_length = self.caption_process.Run(df)
         train = split(mapping)[0]
         return features, mapping, tokenizer, vocab_size, max_length, train
@@ -40,10 +40,11 @@ class ModelTrainer:
 
         features, mapping, tokenizer, vocab_size, max_length, train = self.prepare_data()
         self.build_model(vocab_size, max_length)
-        
+        self.model.summary()
         steps = len(train) // self.batch_size
         for i in range(self.epochs):
             generator = data_generator(train, mapping, features, tokenizer, max_length, vocab_size, self.batch_size)
+            print(generator.__sizeof__)
             self.model.fit(generator, epochs=1, steps_per_epoch=steps, callbacks=cp_callback, verbose=1)
 
     def load_weights(self, model_dir, vocab_size, max_length):

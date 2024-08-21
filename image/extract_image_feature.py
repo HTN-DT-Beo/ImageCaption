@@ -24,9 +24,9 @@ class Extract_Image_Feature:
         print(self.model.summary())
 
     def Extract_Img_Feature(self):
+        self.Restructure_Model()
         load_data = Load_Data()
         df = load_data.Get_1000()
-        print(df.head(10))
 
         features = {}
 
@@ -34,40 +34,58 @@ class Extract_Image_Feature:
             # Đọc ảnh bằng url 
             response = requests.get(url)
             img = Image.open(BytesIO(response.content))
-
-            # Chuyển đổi ảnh thành RGB nếu cần
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
-
-            # Resize hình ảnh
-            image = img.resize((224, 224))
-
-            # convert image pixels to numpy array
-            image = np.array(image)
-            print(image.shape)
-
-            # Đảm bảo kích thước đúng định dạng (1, 224, 224, 3)
-            image = image.reshape((1, 224, 224, 3))
-            print(image.shape)
-
-            # preprocess image for vgg
-            image = preprocess_input(image)
-
-            # extract features
-            feature = self.model.predict(image, verbose=0)
-
             # get image ID
             image_id = url
 
             # store feature
-            features[image_id] = feature
+            features[image_id] = self.get_custom_feature(img)
+            print(features[image_id].shape)
         return features
+
+    # def Extract_Img_Feature(self):
+    #     load_data = Load_Data()
+    #     df = load_data.Get_1000()
+    #     print(df.head(10))
+
+    #     features = {}
+
+    #     for url in df['url']:
+    #         # Đọc ảnh bằng url 
+    #         response = requests.get(url)
+    #         img = Image.open(BytesIO(response.content))
+
+    #         # Chuyển đổi ảnh thành RGB nếu cần
+    #         if img.mode != 'RGB':
+    #             img = img.convert('RGB')
+
+    #         # Resize hình ảnh
+    #         image = img.resize((224, 224))
+
+    #         # convert image pixels to numpy array
+    #         image = np.array(image)
+
+    #         # Đảm bảo kích thước đúng định dạng (1, 224, 224, 3)
+    #         image = image.reshape((1, 224, 224, 3))
+    #         print(image.shape)
+
+    #         # preprocess image for vgg
+    #         image = preprocess_input(image)
+
+    #         # extract features
+    #         feature = self.model.predict(image, verbose=0)
+
+    #         # get image ID
+    #         image_id = url
+
+    #         # store feature
+    #         features[image_id] = feature
+    #     return features
     
-    def Store_Features(self):
+    def Store_Features(self, file_name):
         features = self.Extract_Img_Feature()
 
         # store features in pickle
-        file_path = os.path.join(WORKING_DIR, '220k_GPT4_features_top1000.pkl')
+        file_path = os.path.join(WORKING_DIR, file_name)
 
         # Tạo các thư mục nếu chúng chưa tồn tại
         os.makedirs(WORKING_DIR, exist_ok=True)
@@ -76,7 +94,32 @@ class Extract_Image_Feature:
         with open(file_path, 'wb') as f:
             pickle.dump(features, f)
 
-    def Load_Features(self):
-        with open(os.path.join(WORKING_DIR, '220k_GPT4_features_top1000.pkl'), 'rb') as f:
+    def Load_Features(self, file_name):
+        with open(os.path.join(WORKING_DIR, file_name), 'rb') as f:
             features = pickle.load(f)
         return features
+    
+    # Get feature:
+    def get_custom_feature(self, img):
+        # load vgg16 model
+        model_VGG16 = self.model
+
+        # Chuyển đổi ảnh thành RGB nếu cần
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+
+        # Resize hình ảnh
+        image = img.resize((224, 224))
+
+        # convert image pixels to numpy array
+        image = np.array(image)
+
+        # Đảm bảo kích thước đúng định dạng (1, 224, 224, 3)
+        image = image.reshape((1, 224, 224, 3))
+
+        # preprocess image for vgg
+        image = preprocess_input(image)
+
+        # extract features
+        feature = model_VGG16.predict(image, verbose=0)
+        return feature
