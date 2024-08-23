@@ -42,45 +42,6 @@ class Extract_Image_Feature:
             print(features[image_id].shape)
         return features
 
-    # def Extract_Img_Feature(self):
-    #     load_data = Load_Data()
-    #     df = load_data.Get_1000()
-    #     print(df.head(10))
-
-    #     features = {}
-
-    #     for url in df['url']:
-    #         # Đọc ảnh bằng url 
-    #         response = requests.get(url)
-    #         img = Image.open(BytesIO(response.content))
-
-    #         # Chuyển đổi ảnh thành RGB nếu cần
-    #         if img.mode != 'RGB':
-    #             img = img.convert('RGB')
-
-    #         # Resize hình ảnh
-    #         image = img.resize((224, 224))
-
-    #         # convert image pixels to numpy array
-    #         image = np.array(image)
-
-    #         # Đảm bảo kích thước đúng định dạng (1, 224, 224, 3)
-    #         image = image.reshape((1, 224, 224, 3))
-    #         print(image.shape)
-
-    #         # preprocess image for vgg
-    #         image = preprocess_input(image)
-
-    #         # extract features
-    #         feature = self.model.predict(image, verbose=0)
-
-    #         # get image ID
-    #         image_id = url
-
-    #         # store feature
-    #         features[image_id] = feature
-    #     return features
-    
     def Store_Features(self, file_name):
         features = self.Extract_Img_Feature()
 

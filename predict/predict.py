@@ -131,28 +131,23 @@ def show_result_ICG(image_name, cap_mode = 0):
 
 ## Test with custom Image
 # Get feature:
-def get_custom_feature(url):
+def get_custom_feature(image):
     # load vgg16 model
     model_VGG16 = VGG16()
     # restructure the model
     model_VGG16 = Model(inputs=model_VGG16.inputs, outputs=model_VGG16.layers[-2].output)
 
-    # load the image form file
-    img = Image.open(url)
-
     eif = EIF()
     eif.Restructure_Model()
-    feature = eif.get_custom_feature(img)
+    feature = eif.get_custom_feature(image)
     return feature
 
-def generate_predict_caption(image_url, model, tokenizer, max_length):
-    # Read Image
-    image = Image.open(image_url)
+def generate_predict_caption(image, model, tokenizer, max_length):
     # Get Image Feature
-    feature = get_custom_feature(image_url)
-    print(feature.shape)
+    feature = get_custom_feature(image)
     # Predict the caption
     y_pred = predict_caption(model, feature, tokenizer, max_length)
     print('----------------------Predicted------------------')
     print(y_pred)
-    plt.imshow(image)
+    y_pred = y_pred.replace("startseq ", "").replace(" endseq", "")
+    return y_pred

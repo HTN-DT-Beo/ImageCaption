@@ -2,7 +2,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.utils import to_categorical
 import numpy as np
 
-def data_generator(data_keys, mapping, features, tokenizer, max_length, vocab_size, batch_size):
+def data_generator(data_keys, mapping, features, tokenizer, max_length, vocab_size, batch_size, stride=None):
     X1, X2, y = list(), list(), list()
     n = 0
     while True:
@@ -14,7 +14,10 @@ def data_generator(data_keys, mapping, features, tokenizer, max_length, vocab_si
             # split the sequence into X, y pairs
             for i in range(1, len(seq)):
                 # split into input and output pairs
-                in_seq, out_seq = seq[:i], seq[i]
+                if stride is None:
+                    in_seq, out_seq = seq[:i], seq[i]
+                else:
+                    in_seq, out_seq = seq[max(0, i-stride):i], seq[i]
                 # pad input sequence
                 in_seq = pad_sequences([in_seq], maxlen=max_length, padding='post') [0] # Pad sequences at the end
 

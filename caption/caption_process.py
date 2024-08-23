@@ -9,7 +9,7 @@ class Caption_Process:
     def Collect_Caption(self, df):
         captions_doc = ""
         for caption in df['caption']:
-            captions_doc += caption + "\n"  # Thêm dấu xuống dòng giữa các caption nếu cần
+            captions_doc += caption + "\n"
         return captions_doc
     
     def Mapping_Caption(self, df):
