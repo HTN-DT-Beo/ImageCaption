@@ -43,7 +43,7 @@ class ModelTrainer:
         self.model.summary()
         steps = len(train) // self.batch_size
         for i in range(self.epochs):
-            generator = data_generator(train, mapping, features, tokenizer, max_length, vocab_size, self.batch_size)
+            generator = data_generator(train, mapping, features, tokenizer, max_length, vocab_size, self.batch_size, stride=2)
             self.model.fit(generator, epochs=1, steps_per_epoch=steps, callbacks=cp_callback, verbose=1)
 
     def load_weights(self, model_dir, vocab_size, max_length):
