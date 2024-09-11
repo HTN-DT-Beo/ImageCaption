@@ -5,6 +5,7 @@ from caption.caption_process import Caption_Process as CP
 from generate_text.caption_generate import data_generator
 from data.load_220k_GPT4 import Load_Data
 from train.LSTM_Decoder import LSTM_ImageCaptionModel
+from train.TFBert_Decoder import BERT_ImageCaptionModel
 from train.method import split
 
 WEIGHT_DIR = 'model/weights/'
@@ -27,8 +28,11 @@ class ModelTrainer:
         train = split(mapping)[0]
         return features, mapping, tokenizer, vocab_size, max_length, train
 
-    def build_model(self, vocab_size, max_length):
+    def build_model_LSTM(self, vocab_size, max_length):
         self.model = LSTM_ImageCaptionModel(vocab_size, max_length)
+
+    def build_model_BERT(self, vocab_size, max_length):
+        self.model = BERT_ImageCaptionModel(vocab_size, max_length)
 
     def train_model(self, model_dir):
         checkpoint_path = WEIGHT_DIR + model_dir + CHECKPOINT_PATH
@@ -39,16 +43,16 @@ class ModelTrainer:
             verbose=1)
 
         features, mapping, tokenizer, vocab_size, max_length, train = self.prepare_data()
-        self.build_model(vocab_size, max_length)
+        self.build_model_LSTM(vocab_size, max_length)
         self.model.summary()
         steps = len(train) // self.batch_size
         for i in range(self.epochs):
-            generator = data_generator(train, mapping, features, tokenizer, max_length, vocab_size, self.batch_size, stride=2)
+            generator = data_generator(train, mapping, features, tokenizer, max_length, vocab_size, self.batch_size, stride=10, token_type=1)
             self.model.fit(generator, epochs=1, steps_per_epoch=steps, callbacks=cp_callback, verbose=1)
 
     def load_weights(self, model_dir, vocab_size, max_length):
         checkpoint_path = WEIGHT_DIR + model_dir + CHECKPOINT_PATH
-        self.build_model(vocab_size, max_length)
+        self.build_model_LSTM(vocab_size, max_length)
         # Tải trọng số từ checkpoint
         self.model.load_weights(checkpoint_path.format(epoch=1))
         return self.model

@@ -1,5 +1,7 @@
 from tqdm import tqdm
 from tensorflow.keras.preprocessing.text import Tokenizer
+from transformers import BertTokenizer, BertModel
+
 
 
 class Caption_Process:
@@ -29,7 +31,7 @@ class Caption_Process:
         return mapping
     
     @staticmethod
-    def clean(mapping):
+    def clean(mapping, start_end_token = True):
         for key, captions in mapping.items():
             for i in range(len(captions)):
                 # take one caption at a time
@@ -41,8 +43,9 @@ class Caption_Process:
                 caption = caption.replace('[^A-Za-z]', '')
                 # delete additional spaces
                 caption = caption.replace('\s+', ' ')
-                # add start and end tags to the caption
-                caption = 'startseq ' + " ".join([word for word in caption.split() if len(word)>1]) + ' endseq'
+                if start_end_token == True:
+                    # add start and end tags to the caption
+                    caption = 'startseq ' + " ".join([word for word in caption.split() if len(word)>1]) + ' endseq'
                 captions[i] = caption
         return mapping
     
@@ -66,12 +69,27 @@ class Caption_Process:
         max_length
         return tokenizer, vocab_size, max_length
     
+    @staticmethod
+    def BertTokenizer_Caption(all_captions):
+        # tokenize the text
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        tokenized_caption = tokenizer(all_captions, return_tensors='pt', padding=True, truncation=True)
+        vocab_size = tokenizer.vocab_size
+
+
+        print(tokenized_caption)
+
+        # get maximum length of the caption available
+        max_length = max(len(caption.split()) for caption in all_captions)
+        max_length
+        return tokenizer, vocab_size, max_length
+    
     def Run(self, df):
         captions_doc = self.Collect_Caption(df)
         mapping = self.Mapping_Caption(df)
-        mapping = Caption_Process.clean(mapping)
+        mapping = Caption_Process.clean(mapping, start_end_token=False)
         all_captions = Caption_Process.Append_Caption(mapping)
-        tokenizer, vocab_size, max_length = Caption_Process.Tokenizer_Caption(all_captions)
+        tokenizer, vocab_size, max_length = Caption_Process.BertTokenizer_Caption(all_captions)
         return mapping, tokenizer, vocab_size, max_length
 
 

@@ -6,7 +6,7 @@ import streamlit as st
 from PIL import Image
 
 DATA_DIR = 'data'
-MODEL_DIR = 'LSTM_2wordGC'
+MODEL_DIR = 'TestModel'
 EXTRACT_IMAGE_FEATURE_FILE = '220k_GPT4_features_.pkl'
 
 # --------------------------- EXTRACT IMAGE FEATURE ------------------------
@@ -22,7 +22,8 @@ trainer = ModelTrainer()
 trainer.train_model(MODEL_DIR)
 features, mapping, tokenizer, vocab_size, max_length, train = trainer.prepare_data()
 
-'''
+
+"""
 # --------------------------- IMAGE -----------------------
 
 # Tạo tiêu đề cho ứng dụng
@@ -51,5 +52,4 @@ model = trainer.load_weights(MODEL_DIR, vocab_size, max_length)
 if st.button("Generate Caption"):
     caption = predict.generate_predict_caption(image, model, tokenizer, max_length)
     st.write("Image Caption:", caption)
-
-'''
+"""

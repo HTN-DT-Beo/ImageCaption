@@ -1,3 +1,4 @@
+import tensorflow
 from image.extract_image_feature import Extract_Image_Feature as EIF
 from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -11,11 +12,17 @@ import numpy as np
 import requests
 
 
-def idx_to_word(integer, tokenizer):
-    for word, index in tokenizer.word_index.items():
-        if index == integer:
-            return word
-    return None
+def idx_to_word(integer, tokenizer, bert=False):
+    if bert==False:
+        for word, index in tokenizer.word_index.items():
+            if index == integer:
+                return word
+        return None
+    else:
+        if integer == 0:
+            return None  # Padding token
+        return tokenizer.decode([integer], skip_special_tokens=True)
+
 
 def predict_caption(model, image, tokenizer, max_length):
     # add start tag for generation process
@@ -41,6 +48,34 @@ def predict_caption(model, image, tokenizer, max_length):
         if word == 'endseq':
             break
     return in_text
+
+def Bert_predict_caption(model, image, tokenizer, max_length=20):
+    in_text = ''  # Bắt đầu bằng chuỗi trống, không cần [CLS]
+    for i in range(max_length):
+        # encode the text using BERT tokenizer
+        encoding = tokenizer.encode(in_text, add_special_tokens=False)  # Không thêm special tokens
+        # pad encoding
+        encoding = pad_sequences([encoding], maxlen=max_length, padding='post')
+        # Convert encoding to int32
+        encoding = tensorflow.cast(encoding, dtype=tensorflow.int32)
+
+        # predict next word
+        yhat = model.predict([image, encoding], verbose=0)
+        # get index with highest probability
+        yhat = np.argmax(yhat)
+        # map integer to word
+        word = idx_to_word(yhat, tokenizer, bert=True)
+
+        if word is None:
+            break  # Dừng lại nếu không tìm thấy từ hợp lệ
+        # Avoid adding special tokens like [SEP]
+        if word != '[SEP]':  # Chỉ thêm từ nếu không phải là [SEP]
+            in_text += ' ' + word
+
+        if word == '[SEP]':  # Dừng lại khi gặp token kết thúc [SEP]
+            break
+
+    return in_text.strip()  # Loại bỏ khoảng trắng thừa ở đầu/đuôi chuỗi
 
 def cal_corpus_bleu(test, mapping, model, features, tokenizer, max_length):
     actual, predicted = list(), list()
@@ -146,7 +181,7 @@ def generate_predict_caption(image, model, tokenizer, max_length):
     # Get Image Feature
     feature = get_custom_feature(image)
     # Predict the caption
-    y_pred = predict_caption(model, feature, tokenizer, max_length)
+    y_pred = Bert_predict_caption(model, feature, tokenizer, max_length)
     print('----------------------Predicted------------------')
     print(y_pred)
     y_pred = y_pred.replace("startseq ", "").replace(" endseq", "")
