@@ -18,7 +18,7 @@ icg_venv/
 *.bak
 *.swp
 *.DS_Store
-
+*.pt
 # Ignore các tệp dữ liệu, mô hình hoặc đầu ra lớn
 data/
 models/

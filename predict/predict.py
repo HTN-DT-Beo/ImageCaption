@@ -10,18 +10,40 @@ from tqdm import tqdm
 from PIL import Image
 import numpy as np
 import requests
+import torch
 
 
-def idx_to_word(integer, tokenizer, bert=False):
-    if bert==False:
-        for word, index in tokenizer.word_index.items():
-            if index == integer:
-                return word
-        return None
-    else:
-        if integer == 0:
-            return None  # Padding token
-        return tokenizer.decode([integer], skip_special_tokens=True)
+
+# def idx_to_word(integer, tokenizer, bert=False):
+#     if bert==False:
+#         for word, index in tokenizer.word_index.items():
+#             if index == integer:
+#                 return word
+#         return None
+#     else:
+#         if integer == 0:
+#             return None  # Padding token
+#         return tokenizer.decode([integer], skip_special_tokens=True)
+
+def idx_to_word(tensor_ids, tokenizer, bert=True):
+    # Kiểm tra xem tensor_ids có phải là một tensor hay không
+    if isinstance(tensor_ids, torch.Tensor):
+        # Chuyển tensor thành list để xử lý từng phần tử
+        tensor_ids = tensor_ids.tolist()
+
+    # Kiểm tra nếu tensor_ids chỉ là một giá trị (như numpy.int64) và không thể lặp
+    if isinstance(tensor_ids, (int, np.integer)):
+        tensor_ids = [tensor_ids]  # Chuyển giá trị đơn thành danh sách
+
+    words = []
+    for integer in tensor_ids:
+        if integer == 0:  # Bỏ qua nếu giá trị bằng 0 (giả sử 0 là token padding)
+            continue
+        # Decode từng token ID thành từ
+        words.append(tokenizer.decode([integer], skip_special_tokens=True))
+    
+    return " ".join(words)
+
 
 
 def predict_caption(model, image, tokenizer, max_length):
