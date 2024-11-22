@@ -19,6 +19,8 @@ icg_venv/
 *.swp
 *.DS_Store
 *.pt
+*.json
+*.safetensors
 # Ignore các tệp dữ liệu, mô hình hoặc đầu ra lớn
 data/
 models/
