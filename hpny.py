@@ -1,0 +1,1 @@
+print("Năm mới thành công. CÓ việc, có tiền, có bồ, có nhà, có xe")
